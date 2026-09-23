@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Hello World",
-  description: "A simple Next.js Hello World app deployed on Vercel.",
+  title: "Things That Spark Ideas",
+  description: "A Next.js list powered by Supabase and deployed on Vercel.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
