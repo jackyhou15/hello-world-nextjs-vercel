@@ -11,6 +11,7 @@ Copy `.env.example` to `.env.local` and set:
 ```bash
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_SITE_URL=https://hello-world-nextjs-vercel.vercel.app
 GEMINI_API_KEY=your-gemini-api-key
 ```
 

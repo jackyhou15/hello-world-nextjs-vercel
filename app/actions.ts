@@ -16,11 +16,15 @@ export async function signInWithGoogle() {
     throw new Error("Unable to determine the application URL.");
   }
 
+  const requestOrigin = `${protocol}://${host}`;
+  const callbackOrigin =
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? requestOrigin;
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${protocol}://${host}/auth/callback`,
+      redirectTo: `${callbackOrigin}/auth/callback`,
     },
   });
 
