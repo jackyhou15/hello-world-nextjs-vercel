@@ -17,22 +17,9 @@ export async function signInWithGoogle() {
   }
 
   const requestOrigin = `${protocol}://${host}`;
-  const callbackOrigin =
+  const authOrigin =
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? requestOrigin;
-
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: `${callbackOrigin}/auth/callback`,
-    },
-  });
-
-  if (error || !data.url) {
-    throw new Error(error?.message ?? "Unable to start Google sign-in.");
-  }
-
-  redirect(data.url);
+  redirect(`${authOrigin}/auth/sign-in`);
 }
 
 export async function signOut() {
