@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Idea Cabinet",
-  description:
-    "A Next.js list and private profile powered by Supabase authentication.",
+  title: "Sidewalk Takes",
+  description: "AI-generated NYC captions rated by the crowd.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

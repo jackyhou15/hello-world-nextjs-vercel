@@ -37,8 +37,8 @@ export default async function ProfilePage() {
         <Link className="text-link" href="/">
           Home
         </Link>
-        <Link className="text-link" href="/studio">
-          Private studio
+        <Link className="text-link" href="/create">
+          Make a caption
         </Link>
         <form action={signOut}>
           <button className="button secondary-button" type="submit">

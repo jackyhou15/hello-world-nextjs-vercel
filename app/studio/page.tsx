@@ -28,6 +28,9 @@ export default async function StudioPage() {
         <Link className="text-link" href="/profile">
           Profile
         </Link>
+        <Link className="text-link" href="/create">
+          Make a caption
+        </Link>
         <form action={signOut}>
           <button className="button secondary-button" type="submit">
             Sign out
