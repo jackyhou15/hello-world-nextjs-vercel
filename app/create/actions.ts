@@ -32,12 +32,13 @@ Requirements: One sentence, at most 24 words. Be specific and surprising. Keep i
 Visual vibe: ${style}. ${style === "dry" ? "Muted warm neutrals, dry visual wit, clean composition." : style === "chaotic" ? "Playful exaggerated poses, lively coral and teal, bold composition." : "Soft warm colors, gentle shapes, optimistic atmosphere."}
 Make the NYC scene immediately recognizable through meaningful people, objects, and city details. Draw a polished flat illustration with a foreground, middle ground, and background, using a limited palette and 25 to 55 thoughtfully placed shapes. Fill the whole 800 by 600 canvas with a pale background. No text, letters, logos, watermarks, or caption baked into the image.
 Return SVG markup with xmlns="http://www.w3.org/2000/svg" and viewBox="0 0 800 600". Only use svg, g, rect, circle, ellipse, path, polygon, polyline, and line. No style, scripts, external resources, gradients, filters, or foreignObject. Use inline fill and stroke attributes. Also describe the image in one sentence for accessible alt text.` : null;
+  const generationPrompt = `${prompt}\n\n${imagePrompt ?? "No illustration requested."}\nReturn a JSON object.`;
   const id = randomUUID();
   let imagePath: string | null = null;
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY, httpOptions: { timeout: 45000 } });
     const response = await ai.models.generateContent({
-      model, contents: `${prompt}\n\n${imagePrompt ?? "No illustration requested."}\nReturn a JSON object.`,
+      model, contents: generationPrompt,
       config: {
         temperature: 0.9, maxOutputTokens: withImage ? 8192 : 300, responseMimeType: "application/json",
         responseJsonSchema: {
@@ -58,7 +59,7 @@ Return SVG markup with xmlns="http://www.w3.org/2000/svg" and viewBox="0 0 800 6
       if (error) return { error: "The illustration couldn't be saved. Your scene is still here; please try again." };
     }
     const { error } = await supabase.from("generations").insert({
-      id, created_by: user.id, scene, style, prompt, caption: output.caption.trim(), model,
+      id, created_by: user.id, scene, style, prompt: generationPrompt, caption: output.caption.trim(), model,
       image_path: imagePath, image_description: imagePath ? String(output.imageDescription).slice(0, 600) : null, image_prompt: imagePrompt,
     });
     if (error) {

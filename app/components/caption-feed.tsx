@@ -14,7 +14,7 @@ export async function CaptionFeed({ captions, board }: { captions: Generation[];
       return <article className="caption-card" id={`caption-${item.id}`} key={item.id}>
         {imageUrl && <div className="caption-art"><img src={imageUrl} alt={item.image_description ?? `AI illustration of ${item.scene}`} loading="lazy" width="800" height="600" /><span className="art-label">AI illustration</span></div>}
         <div className="caption-body">
-          <div className="caption-meta"><span className={`vibe-badge ${item.style}`}>{isCaptionStyle(item.style) ? captionStyles[item.style].label : item.style}</span><time dateTime={item.created_at}>{new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", month: "short", day: "numeric" }).format(new Date(item.created_at))}</time><span className="score">{score.score} <span>points</span></span></div>
+          <div className="caption-meta"><span className={`vibe-badge ${item.style}`}>{isCaptionStyle(item.style) ? captionStyles[item.style].label : item.style}</span><time dateTime={item.created_at}>{new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", month: "short", day: "numeric" }).format(new Date(item.created_at))}</time><span className="score">{score.score} <span>{Math.abs(score.score) === 1 ? "point" : "points"}</span></span></div>
           <p className="scene">{item.scene}</p>
           <blockquote>{item.caption}</blockquote>
           <CaptionControls id={item.id} caption={item.caption} signedIn={board.signedIn} vote={votes.get(item.id)} saved={board.savedIds.includes(item.id)} upvotes={score.upvotes} downvotes={score.downvotes} />
