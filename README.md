@@ -40,3 +40,28 @@ Run [`supabase/week4_rating_app.sql`](supabase/week4_rating_app.sql) for the Wee
 npm install
 npm run dev
 ```
+
+
+## Week 5: feedback and iteration
+
+This iteration implements Prasie's feedback from October 7:
+
+- **How does vibe influence the caption?** Each vibe now has a description and an instant example of the same delayed-train scene. The generation prompt contains a concrete tone direction, rather than just a style name. These examples are labeled illustrative; they are not presented as generated results.
+- **Rename Private studio.** The protected `/studio` route is now **My collection**, with **Saved takes** (private to the owner) and **My creations** (your publicly shared generations).
+- **Save/pin captions.** Authenticated users can save/unsave any caption. Rows persist in `saved_captions`, whose RLS policies permit only the owner to read, insert, or delete.
+- **Create an image with captions.** The generator optionally creates an original SVG illustration with Gemini, including descriptive alt text. The existing Google key's raster-image model returned a free-tier quota of zero, so this app uses the working text model to draw SVG art. Images are labeled AI illustrations. They are sanitized to static drawing primitives and saved as files in Supabase Storage, never binary data in Postgres. Both generation prompts are preserved.
+
+Additional usability improvements: responsive image cards, search, vibe filters, top-rated sorting, copy caption, reusable navigation, generation pending states, and inline vote/save errors. Existing captions, profiles, and votes are preserved.
+
+Run `supabase/week5_feedback.sql` once against the same Supabase project before deploying. This adds the image metadata, private saved-captions table, and public AI-illustrations bucket with owner-only uploads/deletes. It does not broaden access to profiles, votes, or avatars.
+
+### Demo flow
+
+1. Visit the public board while logged out; captions and illustrations are readable, but voting/saving require login.
+2. Sign in with Google. Open **Create**, choose a starter or describe a scene, switch vibes to compare examples, then generate a caption and illustration.
+3. Upvote/downvote the new take; refresh to verify persistence. Clicking the selected vote removes it.
+4. Save the take, visit **My collection → Saved takes**, and refresh. Open **My creations** to see your generated content.
+5. Search/filter the board and inspect **Behind the take** to see both saved prompts.
+6. Sign out. `/studio`, `/create`, and `/profile` redirect to the public board.
+
+Keep Vercel deployment protection disabled and submit the URL of the Week 5 commit's deployment. Feedback-group presentation and course submission are performed by the student.

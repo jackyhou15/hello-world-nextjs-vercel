@@ -1,196 +1,23 @@
 import Link from "next/link";
-import { signInWithGoogle, signOut } from "@/app/actions";
-import { rateCaption } from "@/app/votes/actions";
-import { createClient } from "@/lib/supabase/server";
-
-type Generation = {
-  id: string;
-  scene: string;
-  style: string;
-  prompt: string;
-  caption: string;
-  model: string;
-  created_at: string;
-};
-
-type Score = {
-  generation_id: string;
-  upvotes: number;
-  downvotes: number;
-  score: number;
-};
-
-export default async function Home() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  const [{ data: generations, error }, { data: scores }] = await Promise.all([
-    supabase
-      .from("generations")
-      .select("id,scene,style,prompt,caption,model,created_at")
-      .order("created_at", { ascending: false }),
-    supabase.rpc("get_generation_scores"),
-  ]);
-
-  if (error) throw new Error(error.message);
-
-  const { data: ownVotes } = user
-    ? await supabase.from("votes").select("generation_id,value")
-    : { data: [] };
-
-  const scoreMap = new Map(
-    ((scores ?? []) as Score[]).map((score) => [score.generation_id, score]),
-  );
-  const voteMap = new Map(
-    (ownVotes ?? []).map((vote) => [vote.generation_id, vote.value]),
-  );
-  const captions = (generations ?? []) as Generation[];
-
-  return (
-    <main className="page-shell">
-      <nav className="top-nav" aria-label="Primary navigation">
-        <Link className="wordmark text-link" href="/">Sidewalk Takes</Link>
-        {user ? (
-          <div className="nav-actions">
-            <Link className="button primary-button nav-button" href="/create">
-              Make a caption
-            </Link>
-            <Link className="text-link" href="/studio">Private studio</Link>
-            <Link className="text-link" href="/profile">Profile</Link>
-            <form action={signOut}>
-              <button className="button secondary-button" type="submit">Sign out</button>
-            </form>
-          </div>
-        ) : (
-          <form action={signInWithGoogle}>
-            <button className="button primary-button" type="submit">Sign in with Google</button>
-          </form>
-        )}
-      </nav>
-
-      <section className="rating-hero" aria-labelledby="page-title">
-        <div>
-          <p className="eyebrow">NYC captions · judged by locals</p>
-          <h1 id="page-title">Did that take land?</h1>
-          <p className="intro">
-            Turn the strange little moments of city life into AI captions, then
-            let the crowd decide what deserves another stop on the feed.
-          </p>
-          {user ? (
-            <Link className="button primary-button hero-cta" href="/create">
-              Generate today&apos;s take
-            </Link>
-          ) : (
-            <p className="login-note">Sign in to generate and vote.</p>
-          )}
-        </div>
-        <aside className="persona-card">
-          <span className="persona-kicker">Built for Sam</span>
-          <strong>New to NYC. Extremely online.</strong>
-          <p>
-            Specific city moments, quick reactions, and a fresh leaderboard
-            make the feed worth checking between classes.
-          </p>
-        </aside>
-      </section>
-
-      <section className="feed-heading" aria-labelledby="feed-title">
-        <div>
-          <p className="eyebrow">Fresh from the five boroughs</p>
-          <h2 id="feed-title">The caption board</h2>
-        </div>
-        <span className="status">{captions.length} AI generations</span>
-      </section>
-
-      {captions.length === 0 ? (
-        <section className="empty-feed">
-          <p>No captions yet. Be the first person to give the crowd a take.</p>
-          {user && (
-            <Link className="button primary-button" href="/create">
-              Generate the first caption
-            </Link>
-          )}
-        </section>
-      ) : (
-        <section className="caption-feed" aria-label="AI generated captions">
-          {captions.map((generation, index) => {
-            const score = scoreMap.get(generation.id) ?? {
-              upvotes: 0,
-              downvotes: 0,
-              score: 0,
-            };
-            const ownVote = voteMap.get(generation.id);
-
-            return (
-              <article className="caption-card" id={`caption-${generation.id}`} key={generation.id}>
-                <div className="caption-meta">
-                  <span>#{String(captions.length - index).padStart(2, "0")}</span>
-                  <span>{generation.style} mode</span>
-                  <time dateTime={generation.created_at}>
-                    {new Intl.DateTimeFormat("en-US", {
-                      timeZone: "America/New_York",
-                      month: "short",
-                      day: "numeric",
-                      hour: "numeric",
-                      minute: "2-digit",
-                    }).format(new Date(generation.created_at))}
-                  </time>
-                </div>
-
-                <p className="scene">The moment: {generation.scene}</p>
-                <blockquote>{generation.caption}</blockquote>
-
-                <div className="rating-row">
-                  {user ? (
-                    <div className="vote-controls" aria-label="Rate this caption">
-                      <form action={rateCaption}>
-                        <input type="hidden" name="generationId" value={generation.id} />
-                        <input type="hidden" name="value" value="1" />
-                        <button
-                          className={`vote-button ${ownVote === 1 ? "active" : ""}`}
-                          type="submit"
-                          aria-label="Upvote caption"
-                          aria-pressed={ownVote === 1}
-                        >
-                          ↑ {score.upvotes}
-                        </button>
-                      </form>
-                      <form action={rateCaption}>
-                        <input type="hidden" name="generationId" value={generation.id} />
-                        <input type="hidden" name="value" value="-1" />
-                        <button
-                          className={`vote-button ${ownVote === -1 ? "active down" : ""}`}
-                          type="submit"
-                          aria-label="Downvote caption"
-                          aria-pressed={ownVote === -1}
-                        >
-                          ↓ {score.downvotes}
-                        </button>
-                      </form>
-                    </div>
-                  ) : (
-                    <span className="rating-hint">Sign in to rate</span>
-                  )}
-                  <strong className="score">Score {score.score}</strong>
-                </div>
-
-                <details className="prompt-details">
-                  <summary>See the saved AI prompt</summary>
-                  <pre>{generation.prompt}</pre>
-                  <span>Generated with {generation.model}</span>
-                </details>
-              </article>
-            );
-          })}
-        </section>
-      )}
-
-      <footer>
-        <span>Next.js</span><span aria-hidden="true">×</span>
-        <span>Supabase RLS</span><span aria-hidden="true">×</span>
-        <span>Gemini</span><span aria-hidden="true">×</span>
-        <span>Vercel</span>
-      </footer>
-    </main>
-  );
+import { SiteNav } from "./components/site-nav";
+import { CaptionFeed } from "./components/caption-feed";
+import { BoardFilters } from "./components/board-filters";
+import { loadBoard, filterBoard, type BoardParams } from "@/lib/board";
+export default async function Home({ searchParams }: { searchParams: Promise<BoardParams> }) {
+  const [board, params] = await Promise.all([loadBoard(), searchParams]);
+  const captions = filterBoard(board, params);
+  return <main className="page-shell">
+    <SiteNav signedIn={board.signedIn} active="board" />
+    <section className="rating-hero" aria-labelledby="page-title">
+      <div><p className="eyebrow">Little city moments. Big main character energy.</p><h1 id="page-title">Your city.<br />Your kind of <em>take.</em></h1><p className="intro">Turn your NYC moments into AI captions and illustrations. Vote for the ones that land. Save the ones you want to come back to.</p><Link className="button primary-button hero-cta" href={board.signedIn ? "/create" : "/auth/sign-in"}>Make a take <span aria-hidden="true">↗</span></Link><span className="hero-footnote">Three vibes. One city. Your judgment.</span></div>
+      <aside className="city-ticket"><span className="ticket-kicker">Your next take starts here</span><div className="ticket-station">NYC</div><p>That delayed train.<br />That tiny apartment.<br />That surprisingly good dollar slice.</p><span className="ticket-rule" /><span className="ticket-bottom">Notice it. Caption it. Keep it.</span></aside>
+    </section>
+    <section className="feed-section" aria-labelledby="feed-title">
+      <div className="feed-heading"><div><p className="eyebrow">The city, through your feed</p><h2 id="feed-title">The take board</h2></div><span className="status">{captions.length} {captions.length === 1 ? "take" : "takes"}</span></div>
+      <BoardFilters params={params} />
+      {!board.signedIn && <p className="board-note">Everyone can explore. Sign in to create, vote, and keep a personal collection.</p>}
+      {board.error ? <p className="form-error" role="alert">{board.error}</p> : captions.length ? <CaptionFeed captions={captions} board={board} /> : <section className="empty-feed"><h3>{board.captions.length ? "No takes match yet." : "The first take is yours."}</h3><p>{board.captions.length ? "Try another search or explore all vibes." : "Describe one little NYC moment and let AI find the angle."}</p><Link className="button secondary-button" href={board.captions.length ? "/" : "/create"}>{board.captions.length ? "Reset filters" : "Create a take"}</Link></section>}
+    </section>
+    <footer><span>Sidewalk Takes</span><span>A little perspective on a very big city.</span></footer>
+  </main>;
 }

@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Sidewalk Takes",
-  description: "AI-generated NYC captions rated by the crowd.",
+  description: "Turn NYC moments into AI captions and illustrations. Vote for your favorites and save a personal collection.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

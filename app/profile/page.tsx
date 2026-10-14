@@ -1,7 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { signOut } from "@/app/actions";
+import { SiteNav } from "@/app/components/site-nav";
 import { createClient } from "@/lib/supabase/server";
 import { updateProfile } from "./actions";
 
@@ -33,19 +32,7 @@ export default async function ProfilePage() {
 
   return (
     <main className="page-shell compact-shell">
-      <nav className="top-nav" aria-label="Primary navigation">
-        <Link className="text-link" href="/">
-          Home
-        </Link>
-        <Link className="text-link" href="/create">
-          Make a caption
-        </Link>
-        <form action={signOut}>
-          <button className="button secondary-button" type="submit">
-            Sign out
-          </button>
-        </form>
-      </nav>
+      <SiteNav signedIn active="profile" />
 
       <section className="profile-panel" aria-labelledby="profile-title">
         <div className="profile-heading">
