@@ -65,3 +65,8 @@ Run `supabase/week5_feedback.sql` once against the same Supabase project before 
 6. Sign out. `/studio`, `/create`, and `/profile` redirect to the public board.
 
 Keep Vercel deployment protection disabled and submit the URL of the Week 5 commit's deployment. Feedback-group presentation and course submission are performed by the student.
+
+
+### Profile upload repair
+
+Avatar files now upload directly from the browser to private Supabase Storage through an authenticated, object-specific signed upload URL. Selecting a photo stages the upload and shows a preview; Save profile applies it. Only the names and object path go through the Server Action, avoiding Next.js's 1 MB request limit and Vercel's 4.5 MB function-payload limit. The existing 5 MB bucket limit and owner-only RLS remain in force. Before saving a path, the server verifies its ownership, actual Storage size, and content type. Failed uploads and saves display inline errors without crashing the profile page.

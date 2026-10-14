@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { SiteNav } from "@/app/components/site-nav";
 import { createClient } from "@/lib/supabase/server";
-import { updateProfile } from "./actions";
+import { ProfileForm } from "./profile-form";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -59,44 +59,7 @@ export default async function ProfilePage() {
           </div>
         )}
 
-        <form className="profile-form" action={updateProfile}>
-          <label>
-            First name
-            <input
-              name="firstName"
-              defaultValue={profile?.first_name ?? ""}
-              autoComplete="given-name"
-              required
-            />
-          </label>
-
-          <label>
-            Last name
-            <input
-              name="lastName"
-              defaultValue={profile?.last_name ?? ""}
-              autoComplete="family-name"
-              required
-            />
-          </label>
-
-          <label className="full-field">
-            Profile photo
-            <input
-              name="avatar"
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
-            />
-            <span className="field-help">
-              JPG, PNG, WebP, or GIF up to 5 MB. The image is stored in
-              Supabase Storage.
-            </span>
-          </label>
-
-          <button className="button primary-button" type="submit">
-            Save profile
-          </button>
-        </form>
+        <ProfileForm firstName={profile?.first_name ?? ""} lastName={profile?.last_name ?? ""} />
       </section>
     </main>
   );

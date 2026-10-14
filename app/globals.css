@@ -566,3 +566,5 @@ footer > span:first-child { font-weight: 700; }
 @media (prefers-reduced-motion: no-preference) {
   .button, .vote-button, .style-option { transition: background-color .15s, border-color .15s; }
 }
+
+.photo-preview { display: flex; align-items: center; gap: 16px; color: var(--muted); font-size: .85rem; }
