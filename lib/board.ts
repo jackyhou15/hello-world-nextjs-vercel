@@ -14,7 +14,7 @@ export async function loadBoard(collection?: "saved" | "mine"): Promise<BoardDat
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const [voteResult, savedResult, scoreResult] = await Promise.all([
-    user ? supabase.from("votes").select("generation_id,value") : Promise.resolve({ data: [], error: null }),
+    user ? supabase.from("votes").select("generation_id,value").eq("user_id", user.id) : Promise.resolve({ data: [], error: null }),
     user ? supabase.from("saved_captions").select("generation_id,created_at").order("created_at", { ascending: false }) : Promise.resolve({ data: [], error: null }),
     supabase.rpc("get_generation_scores"),
   ]);
